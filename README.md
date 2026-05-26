@@ -1,0 +1,146 @@
+# llama.cpp CUDA Builds
+
+This repository automatically builds [llama.cpp](https://github.com/ggml-org/llama.cpp) with CUDA support for multiple NVIDIA GPU architectures and CUDA versions.
+
+## Why This Repository?
+
+The official llama.cpp repository does not provide pre-built CUDA binaries. This repository fills that gap by:
+
+- Building llama.cpp with CUDA support for multiple CUDA toolkit versions
+- Supporting a wide range of NVIDIA GPU architectures (compute capability 7.5+)
+- Automatically tracking upstream llama.cpp releases
+- Providing ready-to-use binaries via GitHub releases
+
+## Supported Configurations
+
+### CUDA Versions
+- CUDA 13.0
+
+### Host CPU Architectures
+
+Each release publishes one tarball per host CPU architecture:
+
+| Suffix | Linux platform | Typical hosts |
+|--------|----------------|---------------|
+| `-amd64` | x86_64 | Most desktops, servers, cloud VMs |
+| `-arm64` | aarch64 | Grace Hopper, Grace Blackwell, DGX Spark, Ampere Altra |
+
+The CUDA compute capabilities below target the runtime GPU and are the same on both host architectures.
+
+### GPU Architectures
+
+| Compute Capability | GPU Examples |
+|-------------------|--------------|
+| 6.1 | Titan XP, Tesla P40, GTX 10xx |
+| 7.0 | Tesla V100 |
+| 7.5 | Tesla T4, RTX 2000 series, Quadro RTX |
+| 8.0 | A100 |
+| 8.6 | RTX 3000 series |
+| 8.9 | RTX 4000 series, L4, L40 |
+| 9.0 | H100, H200, GH200 |
+| 10.0 | B200, GB200 |
+| 12.0 | RTX Pro series, RTX 5000 series |
+
+## Usage
+
+### Download
+
+1. Go to the [Releases](../../releases) page
+2. Download the tarball matching your host CPU architecture — `-amd64` for x86_64, `-arm64` for aarch64. Filename format: `llama.cpp-bXXXX-cuda-<cuda>-<arch>.tar.gz`
+3. Extract the archive:
+
+```bash
+# x86_64 host
+tar -xzf llama.cpp-bXXXX-cuda-13.0-amd64.tar.gz
+# aarch64 host (e.g. Grace Blackwell, DGX Spark)
+tar -xzf llama.cpp-bXXXX-cuda-13.0-arm64.tar.gz
+cd cuda-13.0
+```
+
+### Run
+
+The extracted directory contains all llama.cpp binaries:
+
+```bash
+# Run the main CLI
+./llama-cli --help
+
+# Run the server
+./llama-server --help
+
+# Other utilities
+./llama-bench
+./llama-quantize
+./llama-embedding
+```
+
+### Check Version
+
+Each release includes a `VERSION.txt` file with build information:
+
+```bash
+cat VERSION.txt
+```
+
+## System Requirements
+
+- NVIDIA GPU with compute capability 7.5 or higher
+- Appropriate NVIDIA driver for your CUDA version:
+  - CUDA 12.8+: Driver >= 570.15
+- Linux x86_64 or aarch64 (Ubuntu 24.04 compatible)
+
+## Build Process
+
+Builds are triggered automatically:
+- Daily at 00:00 UTC
+- Only if a new llama.cpp release is detected
+- Can be manually triggered via GitHub Actions
+
+Each build:
+1. Checks for new llama.cpp releases
+2. Clones llama.cpp at the exact release commit
+3. Builds with CMake using CUDA Docker images
+4. Packages binaries for each CUDA version
+5. Creates a GitHub release with all build artifacts
+
+## Choosing Your CUDA Version
+
+Select based on:
+1. **Your GPU architecture** - Blackwell GPUs require CUDA 12.8+
+2. **Your installed CUDA toolkit** - Match the version if possible
+3. **Your NVIDIA driver** - Ensure your driver supports the CUDA version
+
+If unsure, CUDA 12.6.3 offers the widest compatibility with modern GPUs (except Blackwell).
+
+## Manual Building
+
+If you need a custom build:
+
+```bash
+git clone https://github.com/ai-dock/llama.cpp-cuda
+cd llama.cpp-cuda
+
+# Edit .github/workflows/build-cuda.yml to customize architectures or CUDA versions
+# Then trigger a manual workflow run
+```
+
+## License
+
+This repository contains build scripts only. The llama.cpp binaries are subject to the [llama.cpp MIT License](https://github.com/ggml-org/llama.cpp/blob/master/LICENSE).
+
+## Links
+
+- **Upstream llama.cpp**: https://github.com/ggml-org/llama.cpp
+- **CUDA Toolkit**: https://developer.nvidia.com/cuda-toolkit
+- **NVIDIA Driver Downloads**: https://www.nvidia.com/download/index.aspx
+
+## Support
+
+For issues with:
+- **Build process or binaries**: Open an issue in this repository
+- **llama.cpp functionality**: Open an issue in the [upstream repository](https://github.com/ggml-org/llama.cpp/issues)
+
+## Credits
+
+- [llama.cpp](https://github.com/ggml-org/llama.cpp) by Georgi Gerganov and contributors
+- Built and maintained by [ai-dock](https://github.com/ai-dock)
