@@ -193,13 +193,26 @@ jobs:
           tar -czf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-${{ matrix.cuda_version_short }}-${{ matrix.arch.suffix }}.tar.gz cuda-${{ matrix.cuda_version_short }}
           ls -lh *.tar.gz
 
+      - name: Split artifact if too large
+        run: |
+          cd binaries
+          FILE=llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-${{ matrix.cuda_version_short }}-${{ matrix.arch.suffix }}.tar.gz
+          if [ -f "$FILE" ] && [ $(stat -c%s "$FILE") -gt 1900000000 ]; then
+              echo "File $FILE is larger than 1.9 GB, splitting..."
+              split -b 1900M "$FILE" "${FILE}.part-"
+              rm "$FILE"
+              ls -lh
+          else
+              echo "File $FILE is under 1.9 GB, no splitting needed."
+          fi
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           # Arch suffix in the artifact name so the matrix jobs do not collide
           # in actions/download-artifact later.
           name: llama.cpp-cuda-${{ matrix.cuda_version_short }}-${{ matrix.arch.suffix }}
-          path: binaries/*.tar.gz
+          path: binaries/*.tar.gz*
           retention-days: 1
 
   release:
@@ -219,7 +232,7 @@ jobs:
       - name: Prepare release assets
         run: |
           mkdir -p release-assets
-          find artifacts -name "*.tar.gz" -exec cp {} release-assets/ \;
+          find artifacts -type f -exec cp {} release-assets/ \;
           ls -lh release-assets/
 
       - name: Create Release
@@ -260,6 +273,13 @@ jobs:
             # arm64 host (e.g. Grace Blackwell)
             tar -xzf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-13.0-arm64.tar.gz
             ./llama-cli --help
+            ```
+            
+            ### Large File Downloads
+            If the download consists of multiple parts (e.g. `.part-aa`, `.part-ab`), join them before extracting:
+            ```bash
+            cat llama.cpp-*.tar.gz.part-* > llama.cpp-*.tar.gz
+            tar -xzf llama.cpp-*.tar.gz
             ```
           files: release-assets/*
           draft: false
