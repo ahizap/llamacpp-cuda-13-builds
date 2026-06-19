@@ -59,13 +59,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cuda_version: ['13.0.1']
+        cuda_version: ['12.8.1', '13.0.1']
         arch:
           # Native runners — no QEMU. nvidia/cuda:*-cudnn-devel-ubuntu24.04 is
           # multi-arch on Docker Hub so the same build path runs on both.
           - { suffix: amd64, runs_on: ubuntu-latest }
           - { suffix: arm64, runs_on: ubuntu-24.04-arm }
         include:
+          - cuda_version: '12.8.1'
+            cuda_version_short: '12.8'
+            cuda_tag: '12.8.1-cudnn-devel-ubuntu24.04'
+            # CUDA compute capabilities target the runtime GPU, not the host
+            # CPU arch, so the same list applies to both amd64 and arm64
+            # builds. Relevant aarch64 GPU contexts (Grace Hopper, Grace
+            # Blackwell, DGX Spark) are covered by sm_90 / sm_100 / sm_120.
+            architectures: '75-virtual;80-virtual;86-virtual;89-virtual;90-virtual;100-virtual;120-virtual'
           - cuda_version: '13.0.1'
             cuda_version_short: '13.0'
             cuda_tag: '13.0.1-cudnn-devel-ubuntu24.04'
@@ -249,6 +257,7 @@ jobs:
             **Commit:** ${{ needs.check-release.outputs.release_hash }}
             
             ## CUDA Versions
+            - CUDA 12.8 - GPU compute capabilities: 7.5, 8.0, 8.6, 8.9, 9.0, 10.0, 12.0
             - CUDA 13.0 - GPU compute capabilities: 7.5, 8.0, 8.6, 8.9, 9.0, 10.0, 12.0
 
             ## Host architectures
@@ -268,9 +277,13 @@ jobs:
             ## Usage
             Download the tarball matching your host CPU arch and CUDA version, then extract:
             ```bash
-            # amd64 host
+            # amd64 host, CUDA 12.8
+            tar -xzf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-12.8-amd64.tar.gz
+            # arm64 host (e.g. Grace Blackwell), CUDA 12.8
+            tar -xzf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-12.8-arm64.tar.gz
+            # amd64 host, CUDA 13.0
             tar -xzf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-13.0-amd64.tar.gz
-            # arm64 host (e.g. Grace Blackwell)
+            # arm64 host (e.g. Grace Blackwell), CUDA 13.0
             tar -xzf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-13.0-arm64.tar.gz
             ./llama-cli --help
             ```
@@ -278,8 +291,7 @@ jobs:
             ### Large File Downloads
             If the download consists of multiple parts (e.g. `.part-aa`, `.part-ab`), join them before extracting:
             ```bash
-            cat llama.cpp-*.tar.gz.part-* > llama.cpp-*.tar.gz
-            tar -xzf llama.cpp-*.tar.gz
+            cat llama.cpp-*.tar.gz.part-aa llama.cpp-*.tar.gz.part-ab | tar -xz
             ```
           files: release-assets/*
           draft: false

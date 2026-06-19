@@ -23,28 +23,29 @@ nvidia-smi | grep "Driver Version"
 ```
 
 Compare against [minimum driver versions](GPU-COMPATIBILITY.md#minimum-cuda-driver-versions):
-- CUDA 12.4: Driver >= 550.54
-- CUDA 12.6: Driver >= 560.28  ← **Recommended for most users**
-- CUDA 12.8: Driver >= 570.15
-- CUDA 12.9: Driver >= 580.13
+- CUDA 12.8: Driver >= 570.15  ← **Recommended for most users**
+- CUDA 13.0: Driver >= 590.xx
 
-**If your driver is too old, download an older CUDA version or update your driver.**
+**If your driver is too old, update your driver or check GPU-COMPATIBILITY.md.**
 
 ## Step 3: Download Binaries
 
 1. Go to [Releases](../../releases/latest)
-2. Download the tarball for your CUDA version, e.g.:
+2. Download the tarball for your CUDA version and host CPU architecture, e.g.:
    ```bash
-   wget https://github.com/ai-dock/llama.cpp-cuda/releases/download/bXXXX/llama.cpp-bXXXX-cuda-12.6.3.tar.gz
+   # x86_64 host
+   wget https://github.com/ai-dock/llama.cpp-cuda/releases/download/<tag>/llama.cpp-<tag>-cuda-12.8-amd64.tar.gz
+   # aarch64 host (e.g. Grace Blackwell)
+   wget https://github.com/ai-dock/llama.cpp-cuda/releases/download/<tag>/llama.cpp-<tag>-cuda-12.8-arm64.tar.gz
    ```
 
-**Not sure which version?** Use CUDA 12.6.3 for most systems.
+**Not sure which version?** Use CUDA 12.8 for most systems.
 
 ## Step 4: Extract
 
 ```bash
-tar -xzf llama.cpp-bXXXX-cuda-12.6.3.tar.gz
-cd cuda-12.6.3
+tar -xzf llama.cpp-<tag>-cuda-12.8-amd64.tar.gz
+cd cuda-12.8
 ```
 
 ## Step 5: Download a Model

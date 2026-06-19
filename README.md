@@ -14,6 +14,7 @@ The official llama.cpp repository does not provide pre-built CUDA binaries. This
 ## Supported Configurations
 
 ### CUDA Versions
+- CUDA 12.8
 - CUDA 13.0
 
 ### Host CPU Architectures
@@ -51,10 +52,10 @@ The CUDA compute capabilities below target the runtime GPU and are the same on b
 
 ```bash
 # x86_64 host
-tar -xzf llama.cpp-bXXXX-cuda-13.0-amd64.tar.gz
-# aarch64 host (e.g. Grace Blackwell, DGX Spark)
-tar -xzf llama.cpp-bXXXX-cuda-13.0-arm64.tar.gz
-cd cuda-13.0
+tar -xzf llama.cpp-bXXXX-cuda-12.8-amd64.tar.gz
+# aarch64 host (e.g. Grace Blackwell)
+tar -xzf llama.cpp-bXXXX-cuda-12.8-arm64.tar.gz
+cd cuda-12.8
 ```
 
 ### Run

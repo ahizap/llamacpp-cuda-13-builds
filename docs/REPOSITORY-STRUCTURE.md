@@ -38,7 +38,7 @@ The heart of the project. This GitHub Actions workflow:
 - Can be manually triggered
 
 **Key features:**
-- Matrix builds across 5 CUDA versions
+- Matrix builds across 2 CUDA versions
 - Architecture-specific compilation
 - Automated release creation
 - Artifact packaging
@@ -157,11 +157,11 @@ Scheduled Trigger (00:00 UTC) or Manual Trigger
               ↓
             [Yes]
               ↓
-    Build Matrix (5 CUDA versions)
+    Build Matrix (2 CUDA versions)
               ↓
-    ┌─────────┬─────────┬─────────┬─────────┬─────────┐
-    │ 12.4.1  │ 12.6.3  │ 12.8.0  │ 12.9.0  │ 13.0.0  │
-    └─────────┴─────────┴─────────┴─────────┴─────────┘
+    ┌─────────┬─────────┐
+    │ 12.8.1  │ 13.0.1  │
+    └─────────┴─────────┘
               ↓
     Docker Build with CUDA
               ↓
@@ -177,12 +177,8 @@ Scheduled Trigger (00:00 UTC) or Manual Trigger
 ### Architecture Selection Logic
 
 ```
-CUDA 12.4.1, 12.6.3:
-    Architectures: 75, 80, 86, 89, 90
-    (No Blackwell support)
-
-CUDA 12.8.0, 12.9.0, 13.0.0:
-    Architectures: 75, 80, 86, 89, 90, 100
+CUDA 12.8.1, 13.0.1:
+    Architectures: 75, 80, 86, 89, 90, 100, 120
     (Includes Blackwell)
 ```
 

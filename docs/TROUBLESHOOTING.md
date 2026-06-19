@@ -50,7 +50,7 @@ sudo ldconfig
    ```
 
 2. **Use an older CUDA build**:
-   - Download a build with older CUDA version (e.g., 12.4.1 instead of 13.0.0)
+   - Download a build with an older CUDA version (e.g., 12.8 instead of 13.0)
    - See [GPU Compatibility Guide](GPU-COMPATIBILITY.md) for driver requirements
 
 #### "no CUDA-capable device is detected"
