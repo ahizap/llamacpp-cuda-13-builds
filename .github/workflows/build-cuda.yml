@@ -59,22 +59,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cuda_version: ['12.8.1', '13.0.1']
-        shared_libs: ['ON', 'OFF']
+        cuda_version: ['13.0.1']
         arch:
           # Native runners — no QEMU. nvidia/cuda:*-cudnn-devel-ubuntu24.04 is
           # multi-arch on Docker Hub so the same build path runs on both.
           - { suffix: amd64, runs_on: ubuntu-latest }
           - { suffix: arm64, runs_on: ubuntu-24.04-arm }
         include:
-          - cuda_version: '12.8.1'
-            cuda_version_short: '12.8'
-            cuda_tag: '12.8.1-cudnn-devel-ubuntu24.04'
-            # CUDA compute capabilities target the runtime GPU, not the host
-            # CPU arch, so the same list applies to both amd64 and arm64
-            # builds. Relevant aarch64 GPU contexts (Grace Hopper, Grace
-            # Blackwell, DGX Spark) are covered by sm_90 / sm_100 / sm_120.
-            architectures: '75-virtual;80-virtual;86-virtual;89-virtual;90-virtual;100-virtual;120-virtual'
           - cuda_version: '13.0.1'
             cuda_version_short: '13.0'
             cuda_tag: '13.0.1-cudnn-devel-ubuntu24.04'
@@ -152,9 +143,9 @@ jobs:
                 -G Ninja \
                 -DGGML_CUDA=ON \
                 -DCMAKE_CUDA_ARCHITECTURES='${{ matrix.architectures }}' \
-                 -DCMAKE_BUILD_TYPE=Release \
-                  -DBUILD_SHARED_LIBS=${{ matrix.shared_libs }} \
-                 -DGGML_NATIVE=OFF \
+                -DCMAKE_BUILD_TYPE=Release \
+                 -DBUILD_SHARED_LIBS=OFF \
+                -DGGML_NATIVE=OFF \
                 -DLLAMA_BUILD_TESTS=OFF \
                 -DLLAMA_BUILD_EXAMPLES=OFF \
                 -DCMAKE_EXE_LINKER_FLAGS='-Wl,-rpath-link,/usr/local/cuda/lib64/stubs' \
@@ -165,23 +156,23 @@ jobs:
               
               echo '=== Copying binaries ==='
               cd /workspace
-              mkdir -p binaries/cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}
+              mkdir -p binaries/cuda-${{ matrix.cuda_version_short }}
 
               # Copy everything from build/bin
-              cp -r llama.cpp/build/bin/* binaries/cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}/
+              cp -r llama.cpp/build/bin/* binaries/cuda-${{ matrix.cuda_version_short }}/
 
               # Strip binaries to reduce size (executables only, not .so files)
-              find binaries/cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}/ -type f -executable ! -name "*.so*" -exec strip {} \; 2>/dev/null || true
+              find binaries/cuda-${{ matrix.cuda_version_short }}/ -type f -executable ! -name "*.so*" -exec strip {} \; 2>/dev/null || true
 
               echo '=== Creating version info ==='
-              echo 'llama.cpp version: ${{ needs.check-release.outputs.release_tag }}' > binaries/cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}/VERSION.txt
-              echo 'CUDA version: ${{ matrix.cuda_version }}' >> binaries/cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}/VERSION.txt
-              echo 'Architectures: ${{ matrix.architectures }}' >> binaries/cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}/VERSION.txt
-              echo 'Build date: '$(date -u +%Y-%m-%d) >> binaries/cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}/VERSION.txt
-              echo 'Build hash: ${{ needs.check-release.outputs.release_hash }}' >> binaries/cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}/VERSION.txt
+              echo 'llama.cpp version: ${{ needs.check-release.outputs.release_tag }}' > binaries/cuda-${{ matrix.cuda_version_short }}/VERSION.txt
+              echo 'CUDA version: ${{ matrix.cuda_version }}' >> binaries/cuda-${{ matrix.cuda_version_short }}/VERSION.txt
+              echo 'Architectures: ${{ matrix.architectures }}' >> binaries/cuda-${{ matrix.cuda_version_short }}/VERSION.txt
+              echo 'Build date: '$(date -u +%Y-%m-%d) >> binaries/cuda-${{ matrix.cuda_version_short }}/VERSION.txt
+              echo 'Build hash: ${{ needs.check-release.outputs.release_hash }}' >> binaries/cuda-${{ matrix.cuda_version_short }}/VERSION.txt
 
               echo '=== Build complete ==='
-              ls -lh binaries/cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}/
+              ls -lh binaries/cuda-${{ matrix.cuda_version_short }}/
               
               echo '=== Cleaning up build directory ==='
               rm -rf llama.cpp
@@ -198,15 +189,15 @@ jobs:
 
       - name: Create tarball
         run: |
-           cd binaries
-           tar -czf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}-${{ matrix.arch.suffix }}.tar.gz cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}
-           ls -lh *.tar.gz
+          cd binaries
+          tar -czf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-${{ matrix.cuda_version_short }}-${{ matrix.arch.suffix }}.tar.gz cuda-${{ matrix.cuda_version_short }}
+          ls -lh *.tar.gz
 
       - name: Split artifact if too large
         run: |
-           cd binaries
-           FILE=llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}-${{ matrix.arch.suffix }}.tar.gz
-           if [ -f "$FILE" ] && [ $(stat -c%s "$FILE") -gt 1900000000 ]; then
+          cd binaries
+          FILE=llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-${{ matrix.cuda_version_short }}-${{ matrix.arch.suffix }}.tar.gz
+          if [ -f "$FILE" ] && [ $(stat -c%s "$FILE") -gt 1900000000 ]; then
               echo "File $FILE is larger than 1.9 GB, splitting..."
               split -b 1900M "$FILE" "${FILE}.part-"
               rm "$FILE"
@@ -220,7 +211,7 @@ jobs:
         with:
           # Arch suffix in the artifact name so the matrix jobs do not collide
           # in actions/download-artifact later.
-           name: llama.cpp-cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}-${{ matrix.arch.suffix }}
+          name: llama.cpp-cuda-${{ matrix.cuda_version_short }}-${{ matrix.arch.suffix }}
           path: binaries/*.tar.gz*
           retention-days: 1
 
@@ -258,7 +249,6 @@ jobs:
             **Commit:** ${{ needs.check-release.outputs.release_hash }}
             
             ## CUDA Versions
-            - CUDA 12.8 - GPU compute capabilities: 7.5, 8.0, 8.6, 8.9, 9.0, 10.0, 12.0
             - CUDA 13.0 - GPU compute capabilities: 7.5, 8.0, 8.6, 8.9, 9.0, 10.0, 12.0
 
             ## Host architectures
@@ -276,19 +266,20 @@ jobs:
             - 12.0: RTX Pro series, RTX 50xx
 
             ## Usage
-            Download the tarball matching your host CPU arch, CUDA version, and build type (shared or static), then extract:
+            Download the tarball matching your host CPU arch and CUDA version, then extract:
             ```bash
-            # Example: amd64 host, CUDA 12.8, static build
-            tar -xzf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-12.8-static-amd64.tar.gz
-            # Example: arm64 host, CUDA 13.0, shared build
-            tar -xzf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-13.0-shared-arm64.tar.gz
+            # amd64 host
+            tar -xzf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-13.0-amd64.tar.gz
+            # arm64 host (e.g. Grace Blackwell)
+            tar -xzf llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-13.0-arm64.tar.gz
             ./llama-cli --help
             ```
             
             ### Large File Downloads
             If the download consists of multiple parts (e.g. `.part-aa`, `.part-ab`), join them before extracting:
             ```bash
-            cat llama.cpp-*.tar.gz.part-aa llama.cpp-*.tar.gz.part-ab | tar -xz
+            cat llama.cpp-*.tar.gz.part-* > llama.cpp-*.tar.gz
+            tar -xzf llama.cpp-*.tar.gz
             ```
           files: release-assets/*
           draft: false
