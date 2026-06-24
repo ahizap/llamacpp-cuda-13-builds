@@ -204,15 +204,15 @@ jobs:
 
       - name: Split artifact if too large
         run: |
-           cd binaries
-           FILE=llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}-${{ matrix.arch.suffix }}.tar.gz
-           if [ -f "$FILE" ] && [ $(stat -c%s "$FILE") -gt 1900000000 ]; then
-              echo "File $FILE is larger than 1.9 GB, splitting..."
-              split -b 1900M "$FILE" "${FILE}.part-"
-              rm "$FILE"
-              ls -lh
+          cd binaries
+          FILE=llama.cpp-${{ needs.check-release.outputs.release_tag }}-cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}-${{ matrix.arch.suffix }}.tar.gz
+          if [ -f "$FILE" ] && [ $(stat -c%s "$FILE") -gt 1900000000 ]; then
+            echo "File $FILE is larger than 1.9 GB, splitting..."
+            split -b 1900M "$FILE" "${FILE}.part-"
+            rm "$FILE"
+            ls -lh
           else
-              echo "File $FILE is under 1.9 GB, no splitting needed."
+            echo "File $FILE is under 1.9 GB, no splitting needed."
           fi
 
       - name: Upload artifact
@@ -220,7 +220,7 @@ jobs:
         with:
           # Arch suffix in the artifact name so the matrix jobs do not collide
           # in actions/download-artifact later.
-           name: llama.cpp-cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}-${{ matrix.arch.suffix }}
+          name: llama.cpp-cuda-${{ matrix.cuda_version_short }}-${{ matrix.shared_libs == 'ON' && 'shared' || 'static' }}-${{ matrix.arch.suffix }}
           path: binaries/*.tar.gz*
           retention-days: 1
 
