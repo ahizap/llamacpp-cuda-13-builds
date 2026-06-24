@@ -59,38 +59,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cuda_version: ['12.8.1', '13.0.1']
-        shared_libs: ['ON', 'OFF']
-        arch:
-          # Native runners — no QEMU. nvidia/cuda:*-cudnn-devel-ubuntu24.04 is
-          # multi-arch on Docker Hub so the same build path runs on both.
-          - { suffix: amd64, runs_on: ubuntu-latest }
-          - { suffix: arm64, runs_on: ubuntu-24.04-arm }
         include:
           - cuda_version: '12.8.1'
             cuda_version_short: '12.8'
-            cuda_tag: '12.8.1-cudnn-devel-ubuntu24.04'
-            # CUDA compute capabilities target the runtime GPU, not the host
-            # CPU arch, so the same list applies to both amd64 and arm64
-            # builds. Relevant aarch64 GPU contexts (Grace Hopper, Grace
-            # Blackwell, DGX Spark) are covered by sm_90 / sm_100 / sm_120.
-            architectures: '75-virtual;80-virtual;86-virtual;89-virtual;90-virtual;100-virtual;120-virtual'
-          - cuda_version: '13.0.1'
-            cuda_version_short: '13.0'
-            cuda_tag: '13.0.1-cudnn-devel-ubuntu24.04'
-            # CUDA compute capabilities target the runtime GPU, not the host
-            # CPU arch, so the same list applies to both amd64 and arm64
-            # builds. Relevant aarch64 GPU contexts (Grace Hopper, Grace
-            # Blackwell, DGX Spark) are covered by sm_90 / sm_100 / sm_120.
-            architectures: '75-virtual;80-virtual;86-virtual;89-virtual;90-virtual;100-virtual;120-virtual'
-          - cuda_version: '12.8.1'
             shared_libs: 'OFF'
             arch: { suffix: amd64-u22, runs_on: ubuntu-22.04 }
             cuda_tag: '12.8.1-cudnn-devel-ubuntu22.04'
+            architectures: '75-virtual;80-virtual;86-virtual;89-virtual;90-virtual;100-virtual;120-virtual'
           - cuda_version: '13.0.1'
+            cuda_version_short: '13.0'
             shared_libs: 'OFF'
             arch: { suffix: amd64-u22, runs_on: ubuntu-22.04 }
             cuda_tag: '13.0.1-cudnn-devel-ubuntu22.04'
+            architectures: '75-virtual;80-virtual;86-virtual;89-virtual;90-virtual;100-virtual;120-virtual'
     
     steps:
       - name: Checkout
