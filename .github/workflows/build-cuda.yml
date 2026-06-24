@@ -83,6 +83,14 @@ jobs:
             # builds. Relevant aarch64 GPU contexts (Grace Hopper, Grace
             # Blackwell, DGX Spark) are covered by sm_90 / sm_100 / sm_120.
             architectures: '75-virtual;80-virtual;86-virtual;89-virtual;90-virtual;100-virtual;120-virtual'
+          - cuda_version: '12.8.1'
+            shared_libs: 'OFF'
+            arch: { suffix: amd64-u22, runs_on: ubuntu-22.04 }
+            cuda_tag: '12.8.1-cudnn-devel-ubuntu22.04'
+          - cuda_version: '13.0.1'
+            shared_libs: 'OFF'
+            arch: { suffix: amd64-u22, runs_on: ubuntu-22.04 }
+            cuda_tag: '13.0.1-cudnn-devel-ubuntu22.04'
     
     steps:
       - name: Checkout
