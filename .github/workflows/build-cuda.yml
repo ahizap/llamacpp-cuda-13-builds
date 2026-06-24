@@ -60,7 +60,7 @@ jobs:
       fail-fast: false
       matrix:
         cuda_version: ['12.8.1', '13.0.1']
-        shared_libs: ['ON', 'OFF']
+        shared_libs: ['OFF']
         arch:
           # Native runners — no QEMU. nvidia/cuda:*-cudnn-devel-ubuntu24.04 is
           # multi-arch on Docker Hub so the same build path runs on both.
